@@ -8,7 +8,11 @@ namespace debug_logger
         SafeQueue<std::string> print_queue;
         PrintThreadClass print_thread(print_queue);
         */
-        Log_Class debuglogger(2, "/var/lib/backup_project.txt");
+        
+        //Log_Class debuglogger(1, "backup_project.txt");
+        
+        // print only - v = 0
+        Log_Class debuglogger;
     #endif
 }
 

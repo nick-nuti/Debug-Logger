@@ -12,6 +12,9 @@
 #include <condition_variable>
 #include <chrono>
 
+#include <fstream>
+#include <type_traits>
+
 #include "debug_logger_class.hpp"
 
     namespace debug_logger
@@ -24,12 +27,23 @@
                     Log_Class(int v, std::string fl)
                     : verbosity(v)
                     , filelocation(fl)
-                    , print_queue()
+                    , print_queue(v, fl)
                     , print_thread(print_queue)
-                    {}
+                    {
+                        // if v == 0 throw error
+                    }
 
                     Log_Class(int v)
                     : verbosity(v)
+                    , filelocation()
+                    , print_queue()
+                    , print_thread(print_queue)
+                    {
+                        // if v == 1 or v == 2 throw error
+                    }
+
+                    Log_Class()
+                    : verbosity(0)
                     , filelocation()
                     , print_queue()
                     , print_thread(print_queue)
@@ -37,11 +51,11 @@
 
                     ~Log_Class()
                     {
-                        std::cout << "Log_Class: Clearing Queue\n";
-                        Log_Class::print_queue.clearqueues();
-
                         std::cout << "Log_Class: Killing logger thread\n";
                         Log_Class::killthread();
+
+                        std::cout << "Log_Class: Clearing Queue\n";
+                        Log_Class::print_queue.clearqueues();
                     }
 
                     inline void startthread()
@@ -51,6 +65,7 @@
 
                     inline void stopthread()
                     {
+                        while(print_thread.dump_printqueue == true);
                         print_thread.runthread = false;
                     }
 

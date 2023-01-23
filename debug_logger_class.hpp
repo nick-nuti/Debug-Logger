@@ -1,14 +1,76 @@
+class fileclass
+{
+    public:
+        fileclass()
+        {}
 
+        fileclass(const std::string filepath)
+        {
+            // need 2 add if - else exception
+            file2access = fopen(filepath.c_str(), "a");
+        }
+
+        fileclass(const char * filepath)
+        {
+            // need 2 add if - else exception
+            file2access = fopen(filepath, "a");
+        }
+        
+        ~fileclass()
+        {
+            if(file2access != NULL) fclose(file2access);
+        }
+
+        void flushmem()
+        {
+            if(file2access != NULL) fflush(file2access);
+        }
+
+        void append(const char * str_append)
+        {
+            fprintf(file2access, "%s", str_append);
+        }
+
+        void append(const std::string str_append)
+        {
+            fprintf(file2access, "%s", str_append.c_str());
+        }
+
+        void append(std::queue<std::string> &q_append)
+        {
+            while(!q_append.empty())
+            {
+                fprintf(file2access, "%s", q_append.front().c_str());
+
+                q_append.pop();
+            }
+
+            fflush(file2access);
+        }
+        
+    private:
+        FILE *file2access;
+};
 
 // https://stackoverflow.com/questions/15278343/c11-thread-safe-queue
 template <class T>
 class SafeQueue
 {
     public:
+        SafeQueue(int v, std::string fl)
+        : q_work()
+        , m()
+        , c()
+        , verbosity(v)
+        , logfile(fl)
+        {}
+
         SafeQueue()
         : q_work()
         , m()
         , c()
+        , verbosity(0)
+        , logfile()
         {}
 
         ~SafeQueue()
@@ -54,7 +116,7 @@ class SafeQueue
             // new
             auto now = std::chrono::system_clock::now();
 
-            if(c.wait_until(lock, now + std::chrono::milliseconds(1), [&]{return !q_work.empty();}))
+            if(c.wait_until(lock, now + std::chrono::milliseconds(100), [&]{return !q_work.empty();}))
             {
                 q_print = q_work; // copy the worker queue into a temp queue so we can release the worker queue faster
 
@@ -74,16 +136,22 @@ class SafeQueue
             }
         }
 
-        // verbosity 1
+        // 3 different dumpqueues
+        // verbosity = 0 -> print to console
+        // verbosity = 1 -> append to file
+        // verbosity = 2 -> print to console & append to file
+
         void dumpqueue()
         {
             while(!q_print.empty())
             {
-                std::cout << q_print.front(); // 1 - print to console
-
+                if(verbosity == 0 || verbosity == 2) std::cout << q_print.front();
+                if(verbosity == 1 || verbosity == 2) logfile.append(q_print.front());
                 q_print.pop();
             }
-            
+
+            if(verbosity == 1 || verbosity == 2) logfile.flushmem();
+
             std::queue<T>().swap(q_print);
         }
 
@@ -96,6 +164,10 @@ class SafeQueue
         }
 
     private:
+        int verbosity = 0;
+
+        fileclass logfile;
+
         std::queue<T> q_work;
         std::queue<T> q_print;
         
@@ -122,13 +194,12 @@ class PrintThreadClass
             std::cout << "PrintThreadClass: Destrucing logger thread class\n";
         }
 
+        bool dump_printqueue;
+
         void queuemonitor(SafeQueue<std::string> &pq)
         {
             std::cout << "Starting logger thread\n";
 
-            bool dump_printqueue;
-
-            
             while(keepalive)
             {
                 while(runthread)

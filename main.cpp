@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // timeout thread and kill it
-    usleep(999);
+    usleep(500);
 
     std::cout << "MY PRINT Time Elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(end_time1-start_time1).count() << "us\n";
     std::cout << "PRINTF Time Elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(end_time2-start_time2).count() << "us\n";
@@ -57,6 +57,8 @@ int main(int argc, char **argv)
     // timeout thread and kill it
     
     //debug_logger::debuglogger.stopthread();
+
+
 
     return 0;
 }
