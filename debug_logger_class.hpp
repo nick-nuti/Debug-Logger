@@ -4,7 +4,7 @@ class fileclass
         fileclass()
         {}
 
-        fileclass(const std::string &filepath)
+        fileclass(const std::string filepath)
         {
             // need 2 add if - else exception
             file2access = fopen(filepath.c_str(), "a");
@@ -31,7 +31,7 @@ class fileclass
             fprintf(file2access, "%s", str_append);
         }
 
-        void append(const std::string &str_append)
+        void append(const std::string str_append)
         {
             fprintf(file2access, "%s", str_append.c_str());
         }
@@ -49,7 +49,7 @@ class fileclass
         }
         
     private:
-        FILE *file2access = nullptr;
+        FILE *file2access;
 };
 
 // https://stackoverflow.com/questions/15278343/c11-thread-safe-queue
@@ -186,20 +186,26 @@ class PrintThreadClass
         bool keepalive = true;
         bool runthread = true;
 
-        // other solutions to std::ref()
-            // make the reference a pointer
-            // rather than a raw pointer make it a shared pointer (safe method)
-
         PrintThreadClass(SafeQueue<std::string> &pq)
             //: thr(&PrintThreadClass::queuemonitor, this, &pq)
             //: thr(&SafeQueue<std::string>::dequeue, &pq) //how do I pass &pq class reference over to queuemonitor
              : thr(&PrintThreadClass::queuemonitor, this, std::ref(pq)) // this is best practice
         {}
 
+        PrintThreadClass()
+        {
+            std::cout << "did nothing in printthreadclass\n";
+        }
+
         ~PrintThreadClass()
         {
-            thr.join();
-            std::cout << "PrintThreadClass: Destructing logger thread class\n";
+            if (thr.joinable())
+            {
+                thr.join();
+                std::cout << "PrintThreadClass: Destrucing logger thread class\n";
+            }
+
+            else std::cout << "PrintThreadClass: Logger thread was not joinable; thread is still active\n";
         }
 
         bool dump_printqueue;
