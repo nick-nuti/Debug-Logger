@@ -39,11 +39,11 @@ int main(int argc, char **argv)
     int i;
 
     auto start_time1 = std::chrono::steady_clock::now();
-    for(i = 0; i < 10; i++) debug_logger::debuglogger.print("THIS IS A STRING PRINT TEST ON ITERATION %v\n", i);
+    for(i = 0; i < 1000; i++) debug_logger::debuglogger.print("THIS IS A STRING PRINT TEST ON ITERATION %v\n", i);
     auto end_time1 = std::chrono::steady_clock::now();
     
     auto start_time2 = std::chrono::steady_clock::now();
-    for(i = 0; i < 10; i++) printf("THIS IS A STRING PRINT TEST ON ITERATION %i\n", i);
+    for(i = 0; i < 1000; i++) printf("THIS IS A STRING PRINT TEST ON ITERATION %i\n", i);
     auto end_time2 = std::chrono::steady_clock::now();
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -4,7 +4,7 @@ class fileclass
         fileclass()
         {}
 
-        fileclass(const std::string filepath)
+        fileclass(const std::string &filepath)
         {
             // need 2 add if - else exception
             file2access = fopen(filepath.c_str(), "a");
@@ -31,7 +31,7 @@ class fileclass
             fprintf(file2access, "%s", str_append);
         }
 
-        void append(const std::string str_append)
+        void append(const std::string &str_append)
         {
             fprintf(file2access, "%s", str_append.c_str());
         }
@@ -49,7 +49,7 @@ class fileclass
         }
         
     private:
-        FILE *file2access;
+        FILE *file2access = nullptr;
 };
 
 // https://stackoverflow.com/questions/15278343/c11-thread-safe-queue
@@ -143,6 +143,10 @@ class SafeQueue
 
         void dumpqueue()
         {
+            // use deque class instead of queue
+            // or use the following
+            //for (auto&& item : queue)
+
             while(!q_print.empty())
             {
                 if(verbosity == 0 || verbosity == 2) std::cout << q_print.front();
@@ -182,6 +186,10 @@ class PrintThreadClass
         bool keepalive = true;
         bool runthread = true;
 
+        // other solutions to std::ref()
+            // make the reference a pointer
+            // rather than a raw pointer make it a shared pointer (safe method)
+
         PrintThreadClass(SafeQueue<std::string> &pq)
             //: thr(&PrintThreadClass::queuemonitor, this, &pq)
             //: thr(&SafeQueue<std::string>::dequeue, &pq) //how do I pass &pq class reference over to queuemonitor
@@ -191,7 +199,7 @@ class PrintThreadClass
         ~PrintThreadClass()
         {
             thr.join();
-            std::cout << "PrintThreadClass: Destrucing logger thread class\n";
+            std::cout << "PrintThreadClass: Destructing logger thread class\n";
         }
 
         bool dump_printqueue;
